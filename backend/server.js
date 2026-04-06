@@ -6,6 +6,10 @@ import mongoose from "mongoose";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GithubStrategy } from "passport-github2";
 import authRoutes from "./routes/auth.js";
+import productsRoutes from "./routes/products.js";
+import ordersRoutes from "./routes/orders.js";
+import walletRoutes from "./routes/wallet.js";
+import paymentsRoutes from "./routes/payments.js";
 import User from "./models/User.js";
 
 dotenv.config();
@@ -110,6 +114,10 @@ app.use(passport.initialize());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/products", productsRoutes);
+app.use("/api/orders", ordersRoutes);
+app.use("/api/wallet", walletRoutes);
+app.use("/api/payments", paymentsRoutes);
 
 app.get("/", (req, res) => res.json({ message: "Vase backend is running" }));
 

@@ -224,4 +224,53 @@ router.get(
   },
 );
 
+// Setup admin user (chỉ khi chưa có admin)
+router.post("/setup-admin", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res
+        .status(400)
+        .json({ message: "name, email, password required" });
+    }
+
+    // Check nếu đã có admin
+    const adminExists = await User.findOne({ role: "admin" });
+    if (adminExists) {
+      return res.status(403).json({ message: "Admin user already exists" });
+    }
+
+    // Check nếu email đã tồn tại
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(409).json({ message: "Email already registered" });
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Tạo admin user
+    const user = new User({
+      name,
+      email,
+      passwordHash,
+      provider: "local",
+      role: "admin",
+      isActive: true,
+    });
+
+    await user.save();
+
+    const token = signToken(user);
+    res.json({
+      message: "Admin user created successfully",
+      token,
+      user: { id: user._id, email: user.email, name: user.name, role: "admin" },
+    });
+  } catch (err) {
+    console.error("Setup admin error:", err);
+    res.status(500).json({ message: "Setup failed" });
+  }
+});
+
 export default router;
